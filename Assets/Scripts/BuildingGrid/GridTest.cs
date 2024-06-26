@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class GridTest : MonoBehaviour
 {
-    public Grid<int> grid;
+    public Grid<GridObject> grid;
 
     // Start is called before the first frame update
     void Start()
     {
-        grid = new Grid<int>(5, 5, 10, Vector3.zero, () => 0);
+        grid = new Grid<GridObject>(5, 5, 10, Vector3.zero, (Grid<GridObject> g, int x, int y) => new GridObject(g, x, y));
     }
 
     // Update is called once per frame
@@ -17,7 +17,7 @@ public class GridTest : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
-            grid.SetItem(GetMouseWorldPosition(), grid.GetItem(GetMouseWorldPosition()) + 1);
+            grid.GetItem(GetMouseWorldPosition()).AddValue(1);
         }
     }
 

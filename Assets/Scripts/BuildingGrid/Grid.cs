@@ -20,7 +20,7 @@ public class Grid<T>
     }
 
     // Constructor
-    public Grid(int width, int height, float cellSize, Vector3 originPosition, Func<T> createGridObject)
+    public Grid(int width, int height, float cellSize, Vector3 originPosition, Func<Grid<T>, int, int, T> createGridObject)
     {
         // Initialize grid data
         this.width = width;
@@ -34,31 +34,45 @@ public class Grid<T>
         {
             for (int y = 0; y < height; y++)
             {
-                gridArray[x, y] = createGridObject();
+                gridArray[x, y] = createGridObject(this, x, y);
             }
         }
 
         // Debug tools: visualize grid layout and item values
-        bool showDebug = true;
-        if (showDebug)
+        bool showDebugGrid = true;
+        bool showDebugText = false;
+        if (showDebugGrid || showDebugText)
         {
-            debugTextArray = new TextMesh[width, height];
+            if (showDebugText) debugTextArray = new TextMesh[width, height];
 
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    debugTextArray[x, y] = CreateWorldText(gridArray[x, y]?.ToString(), null, GetWorldPosition(x, y) + new Vector3(cellSize / 2, cellSize / 2), 30, Color.white);
-                    Debug.DrawLine(GetWorldPosition(x, y), GetWorldPosition(x + 1, y), Color.white, 100f);
-                    Debug.DrawLine(GetWorldPosition(x, y), GetWorldPosition(x, y + 1), Color.white, 100f);
+                    // Draw cell borders and values
+                    if (showDebugText)
+                        debugTextArray[x, y] = CreateWorldText(gridArray[x, y]?.ToString(), null, GetWorldPosition(x, y) + new Vector3(cellSize / 2, cellSize / 2), 30, Color.white);
+                    if (showDebugGrid)
+                    {
+                        Debug.DrawLine(GetWorldPosition(x, y), GetWorldPosition(x + 1, y), Color.white, 100f);
+                        Debug.DrawLine(GetWorldPosition(x, y), GetWorldPosition(x, y + 1), Color.white, 100f);
+                    }
                 }
             }
-            Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
-            Debug.DrawLine(GetWorldPosition(0, height), GetWorldPosition(width, height), Color.white, 100f);
+            // Finish grid border
+            if (showDebugGrid)
+            {
+                Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
+                Debug.DrawLine(GetWorldPosition(0, height), GetWorldPosition(width, height), Color.white, 100f);
+            }
 
-            OnGridValueChanged += (object sender, OnGridValueChangedEventArgs eventArgs) => {
-                debugTextArray[eventArgs.x, eventArgs.y].text = gridArray[eventArgs.x, eventArgs.y]?.ToString();
-            };
+            // Update debug text values when cell values are changed
+            if (showDebugText)
+            {
+                OnGridValueChanged += (object sender, OnGridValueChangedEventArgs eventArgs) => {
+                    debugTextArray[eventArgs.x, eventArgs.y].text = gridArray[eventArgs.x, eventArgs.y]?.ToString();
+                };
+            }
         }
     }
 
@@ -88,7 +102,7 @@ public class Grid<T>
         if (x < 0 || y < 0 || x >= width || y >= height) return;
 
         gridArray[x, y] = value;
-        if (OnGridValueChanged != null) OnGridValueChanged(this, new OnGridValueChangedEventArgs { x = x, y = y });
+        OnGridValueChanged?.Invoke(this, new OnGridValueChangedEventArgs { x = x, y = y });
     }
 
     // Sanitized setter for grid values using world position
@@ -98,14 +112,20 @@ public class Grid<T>
         SetItem(x, y, value);
     }
 
+    // Calls value change event at given grid position
+    public void FlagDirty(int x, int y)
+    {
+        OnGridValueChanged?.Invoke(this, new OnGridValueChangedEventArgs { x = x, y = y });
+    }
+
     // Utility method: converts grid position into world position
-    private Vector3 GetWorldPosition(int x, int y)
+    public Vector3 GetWorldPosition(int x, int y)
     {
         return new Vector3(x, y) * cellSize + originPos;
     }
 
     // Utility method: converts world position to grid position
-    private void GetXY(Vector3 worldPos, out int x, out int y)
+    public void GetXY(Vector3 worldPos, out int x, out int y)
     {
         x = Mathf.FloorToInt((worldPos - originPos).x / cellSize);
         y = Mathf.FloorToInt((worldPos - originPos).y / cellSize);
