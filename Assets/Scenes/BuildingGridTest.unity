@@ -215,6 +215,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1232147853
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1232147855}
+  - component: {fileID: 1232147854}
+  m_Layer: 0
+  m_Name: BuildingGhost
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1232147854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1232147853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c633f4c11931ef418eec299344005a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1232147855
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1232147853}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1751182510
 GameObject:
   m_ObjectHideFlags: 0
@@ -262,10 +306,10 @@ MonoBehaviour:
   gridWidth: 10
   gridHeight: 10
   cellSize: 5
-  buildingOptions:
+  buildingTypes:
   - {fileID: 11400000, guid: 05423f855bbd1d84aafd55179eca476d, type: 2}
-  - {fileID: 11400000, guid: 1437caf0fd8253c4794551bceb16fb9f, type: 2}
   - {fileID: 11400000, guid: 2bdd1a4f11b21ae4c8d9da4c16870e88, type: 2}
+  - {fileID: 11400000, guid: 1437caf0fd8253c4794551bceb16fb9f, type: 2}
   - {fileID: 11400000, guid: d57dff43fabaaa34da29f476dff9ed1b, type: 2}
 --- !u!1 &1802131528
 GameObject:
@@ -368,3 +412,4 @@ SceneRoots:
   - {fileID: 535924630}
   - {fileID: 1802131530}
   - {fileID: 1751182512}
+  - {fileID: 1232147855}

@@ -8,13 +8,12 @@ public class GridObject
     public Grid<GridObject> grid;
     public int x;
     public int y;
-    public int value;
-    private Transform transform;
+    private Building building;
 
     // Properties
     public bool CanBuild
     {
-        get { return transform == null; }
+        get { return building == null; }
     }
 
     // Constructor
@@ -26,25 +25,24 @@ public class GridObject
     }
 
     // Methods
-    public void SetTransform(Transform transform)
+    public Building GetBuilding()
     {
-        this.transform = transform;
+        return building;
+    }
+
+    public void SetBuilding(Building building)
+    {
+        this.building = building;
         grid.FlagDirty(x, y);
     }
 
-    public void ClearTransform()
+    public void ClearBuilding()
     {
-        transform = null;
-    }
-
-    public void AddValue(int value)
-    {
-        this.value += value;
-        grid.FlagDirty(x, y);
+        building = null;
     }
 
     public override string ToString()
     {
-        return x + ", " + y + "\n" + transform;
+        return x + ", " + y + "\n" + building;
     }
 }

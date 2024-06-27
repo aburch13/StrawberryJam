@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: TallBuilding
   prefab: {fileID: 868206667636052994, guid: 21cdb314c58b83c4397b148835af3e5c, type: 3}
-  visual: {fileID: 0}
+  visual: {fileID: 5480582878634267939, guid: 0e0aa1947f0a44e4fbc578a45649cdde, type: 3}
   width: 1
   height: 2
