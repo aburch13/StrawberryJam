@@ -4,7 +4,7 @@ using UnityEngine;
 
 public abstract class CharacterStates 
 {
-    PlayerController playerController;
+    protected PlayerController playerController;
 
     public CharacterStates(PlayerController controller)
     {

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class WalkingState : CharacterStates
 {
+    CharacterController controller;
     public WalkingState(PlayerController controller) : base(controller)
     {
 
@@ -11,16 +12,15 @@ public class WalkingState : CharacterStates
 
     public override void Enter()
     {
-        throw new System.NotImplementedException();
+        controller = playerController.gameObject.GetComponent<CharacterController>();
     }
 
     public override void Exit()
     {
-        throw new System.NotImplementedException();
+
     }
 
     public override void Update()
     {
-        throw new System.NotImplementedException();
     }
 }
