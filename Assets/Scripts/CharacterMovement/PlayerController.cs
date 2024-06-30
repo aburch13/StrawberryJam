@@ -7,21 +7,48 @@ public class PlayerController : MonoBehaviour
 {
     private CharacterStates currentState;
 
-    [SerializeField]
-    private InputAction moveAction, interactAction, pauseAction;
-    [SerializeField]
-    private PlayerInput input;
+    private Interactable nearestInteractable;
 
     // Start is called before the first frame update
     void Start()
     {
-        moveAction = input.actions.FindAction("Move");
-        moveAction.Enable();
+        currentState = new WalkingState(this);
+        currentState.Enter();
     }
 
     // Update is called once per frame
     void Update()
     {
         currentState.Update();
+    }
+
+    public void Interact()
+    {
+        if (nearestInteractable == null)
+        {
+            CharacterStates s = nearestInteractable.Interact();
+            if (s != null )
+            {
+                currentState.Exit();
+                currentState = s;
+                s.Enter();
+            }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.GetComponent<Interactable>() != null)
+        {
+            nearestInteractable = collision.gameObject.GetComponent<Interactable>();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision.GetComponent<Interactable>() != null && collision.GetComponent<Interactable>() == nearestInteractable)
+        {
+            nearestInteractable = null;
+        }
     }
 }
