@@ -7,7 +7,7 @@ using UnityEngine;
 public class BuildingGrid : MonoBehaviour
 {
     // Grid fields
-    private Grid<GridObject> grid;
+    private Grid<BuildGridObject> grid;
     public int gridWidth;
     public int gridHeight;
     public float cellSize;
@@ -62,12 +62,12 @@ public class BuildingGrid : MonoBehaviour
             Instance = this;
 
         // Instantiate new grid
-        grid = new Grid<GridObject>(
+        grid = new Grid<BuildGridObject>(
             gridWidth, 
             gridHeight, 
             cellSize, 
             new Vector3(gridWidth, gridHeight) * -cellSize / 2f, 
-            (Grid<GridObject> g, int x, int y) => new GridObject(g, x, y));
+            (Grid<BuildGridObject> g, int x, int y) => new BuildGridObject(g, x, y));
     }
 
     // Update is called once per frame
@@ -134,10 +134,18 @@ public class BuildingGrid : MonoBehaviour
             }
         }
 
-        // CREATE BUILDING
-        // If all cells in coverage are open, instantiate building and store reference in covered cells
         if (canBuild)
         {
+            // VERIFY BUILD COST
+            // Remove resources from inventory, or cancel build if there are insufficient resources
+            if (!Inventory.Instance.RemoveMultiple(buildingTypes[selectionIndex].buildCost))
+            {
+                Debug.Log("Cannot build: Insufficient resources!");
+                return false;
+            }
+
+            // CREATE BUILDING
+            // If all cells in coverage are open and cost is met, instantiate building and store reference in covered cells
             Building building = Building.Create(grid.GetWorldPosition(gridX, gridY), new Vector2Int(gridX, gridY), buildingTypes[selectionIndex]);
 
             foreach (Vector2Int gridPos in gridCoverage)
@@ -145,7 +153,7 @@ public class BuildingGrid : MonoBehaviour
 
             Debug.Log(buildingTypes[selectionIndex].name + " has been built!");
 
-            // If moving a building
+            // IF MOVING
             // Destroy ghost and unlock selectionIndex
             if (isMoving)
             {
@@ -154,11 +162,12 @@ public class BuildingGrid : MonoBehaviour
                 moveGhost = null;
             }
 
+            // Build success
             return true;
         }
         else
         {
-            Debug.Log("Cannot build there!");
+            Debug.Log("Cannot build: Invalid placement!");
             return false;
         }
     }
@@ -172,7 +181,7 @@ public class BuildingGrid : MonoBehaviour
 
     public void MoveStart()
     {
-        GridObject gridObj = grid.GetItem(GetMouseWorldPosition());
+        BuildGridObject gridObj = grid.GetItem(GetMouseWorldPosition());
         Building building = gridObj.GetBuilding();
 
         if (building != null)
@@ -201,17 +210,21 @@ public class BuildingGrid : MonoBehaviour
     // Destroys any existing building at current mouse position
     public void DestroyBuilding()
     {
-        GridObject gridObj = grid.GetItem(GetMouseWorldPosition());
+        BuildGridObject gridObj = grid.GetItem(GetMouseWorldPosition());
         Building building = gridObj.GetBuilding();
 
         // If building exists at selected cell, remove all cell references and destroy it
         if (building != null)
         {
-            List<Vector2Int> gridCoverage = building.GetGridCoverage();
+            // Refund build cost
+            Inventory.Instance.AddMultiple(building.Data.buildCost);
 
+            // Remove grid cell references
+            List<Vector2Int> gridCoverage = building.GetGridCoverage();
             foreach (Vector2Int gridPos in gridCoverage)
                 grid.GetItem(gridPos.x, gridPos.y).ClearBuilding();
 
+            // Destroy building
             building.DestroySelf();
         }
     }

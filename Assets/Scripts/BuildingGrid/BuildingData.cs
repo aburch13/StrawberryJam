@@ -7,12 +7,12 @@ using UnityEngine;
 public class BuildingData : ScriptableObject
 {
     // Fields
-    public string name;
+    public new string name;
     public Transform prefab;
     public Transform visual;
     public int width;
     public int height;
-    public Dictionary<Items, int> cost;
+    public List<Resource> buildCost;
 
     // Methods
     public List<Vector2Int> GetGridCoverage(Vector2Int offset)
