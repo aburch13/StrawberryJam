@@ -162,6 +162,7 @@ GameObject:
   - component: {fileID: 2801773690134885938}
   - component: {fileID: 2524339942981890445}
   - component: {fileID: 1169048694597126219}
+  - component: {fileID: 393110236388222194}
   m_Layer: 5
   m_Name: DialogBoxBase
   m_TagString: Untagged
@@ -179,7 +180,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1957249059646444120}
   - {fileID: 4726292963910098194}
@@ -231,6 +232,29 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &393110236388222194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2185102770015552964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc4564bb105d3c948ab2ed1094533e5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scaleMin: 0.5
+  scalePeak: 1.1
+  alphaStart: 0
+  rate: 1
+  scaleTargets:
+  - {fileID: 1169048694597126219}
+  alphaTargets:
+  - {fileID: 7369265972784535961}
+  - {fileID: 3880211540683091698}
+  - {fileID: 1423913066897306479}
+  - {fileID: 492965577350541116}
 --- !u!1 &6913894843075597472
 GameObject:
   m_ObjectHideFlags: 0
