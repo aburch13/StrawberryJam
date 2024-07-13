@@ -11,6 +11,7 @@ public class BuildingGrid : MonoBehaviour
     public int gridWidth;
     public int gridHeight;
     public float cellSize;
+    public Transform cellVisual;
 
     // Building selection fields
     [SerializeField] private List<BuildingData> buildingTypes;
@@ -22,13 +23,13 @@ public class BuildingGrid : MonoBehaviour
     public event EventHandler<EventArgs> OnSelectionChange;
 
     // Properties
-    public static BuildingGrid Instance
+    public static BuildingGrid Instance // Singleton property for global access
     {
         get;
         private set;
     }
 
-    public Vector2Int CurrentCellGridPos
+    public Vector2Int CurrentCellGridPos // Mouse position on grid in grid coordinates
     {
         get
         {
@@ -37,7 +38,7 @@ public class BuildingGrid : MonoBehaviour
         }
     }
 
-    public Vector3 CurrentCellWorldPos
+    public Vector3 CurrentCellWorldPos // Mouse position on grid in world coordinates
     {
         get
         {
@@ -48,7 +49,7 @@ public class BuildingGrid : MonoBehaviour
         }
     }
 
-    public BuildingData CurrentSelection
+    public BuildingData CurrentSelection // Currently selected building type
     {
         get { return buildingTypes[selectionIndex]; }
     }
@@ -67,7 +68,12 @@ public class BuildingGrid : MonoBehaviour
             gridHeight, 
             cellSize, 
             new Vector3(gridWidth, gridHeight) * -cellSize / 2f, 
-            (Grid<BuildGridObject> g, int x, int y) => new BuildGridObject(g, x, y));
+            (Grid<BuildGridObject> g, int x, int y) =>
+            {
+                Transform cell = Instantiate(cellVisual, g.GetWorldPosition(x, y), Quaternion.identity, transform);
+                cell.transform.localScale *= cellSize;
+                return new BuildGridObject(g, x, y, cell);
+            });
     }
 
     // Update is called once per frame
@@ -118,58 +124,63 @@ public class BuildingGrid : MonoBehaviour
     // Returns true if new building was successfully placed
     public bool PlaceBuilding(int gridX, int gridY)
     {
+        // SANITIZE INPUT
+        if (gridX < 0 || gridY < 0 || gridX >= gridWidth || gridY >= gridHeight)
+        {
+            Debug.Log("Cannot build: Outside of grid!");
+            return false;
+        }
+
         // CALCULATE GRID COVERAGE
         // Find mouse position on grid and determine all cells covered by selected building
         List<Vector2Int> gridCoverage = buildingTypes[selectionIndex].GetGridCoverage(new Vector2Int(gridX, gridY));
 
         // VAlIDATE PLACEMENT
         // Check if all cells in the building's coverage are open
-        bool canBuild = true;
         foreach (Vector2Int gridPos in gridCoverage)
         {
-            if (!grid.GetItem(gridPos.x, gridPos.y).CanBuild)
+            if (grid.GetItem(gridPos.x, gridPos.y) == null)
             {
-                canBuild = false;
-                break;
-            }
-        }
-
-        if (canBuild)
-        {
-            // VERIFY BUILD COST
-            // Remove resources from inventory, or cancel build if there are insufficient resources
-            if (!Inventory.Instance.RemoveMultiple(buildingTypes[selectionIndex].buildCost))
-            {
-                Debug.Log("Cannot build: Insufficient resources!");
+                Debug.Log("Cannot build: Outside of grid!");
                 return false;
             }
 
-            // CREATE BUILDING
-            // If all cells in coverage are open and cost is met, instantiate building and store reference in covered cells
-            Building building = Building.Create(grid.GetWorldPosition(gridX, gridY), new Vector2Int(gridX, gridY), buildingTypes[selectionIndex]);
-
-            foreach (Vector2Int gridPos in gridCoverage)
-                grid.GetItem(gridPos.x, gridPos.y).SetBuilding(building);
-
-            Debug.Log(buildingTypes[selectionIndex].name + " has been built!");
-
-            // IF MOVING
-            // Destroy ghost and unlock selectionIndex
-            if (isMoving)
+            if (!grid.GetItem(gridPos.x, gridPos.y).CanBuild)
             {
-                isMoving = false;
-                Destroy(moveGhost.gameObject);
-                moveGhost = null;
+                Debug.Log("Cannot build: Invalid placement!");
+                return false;
             }
-
-            // Build success
-            return true;
         }
-        else
+        
+        // VERIFY BUILD COST
+        // Remove resources from inventory, or cancel build if there are insufficient resources
+        if (!Inventory.Instance.RemoveMultiple(buildingTypes[selectionIndex].buildCost))
         {
-            Debug.Log("Cannot build: Invalid placement!");
+            Debug.Log("Cannot build: Insufficient resources!");
             return false;
         }
+
+        // CREATE BUILDING
+        // If all cells in coverage are open and cost is met, instantiate building and store reference in covered cells
+        Building building = Building.Create(grid.GetWorldPosition(gridX, gridY), new Vector2Int(gridX, gridY), buildingTypes[selectionIndex]);
+        building.transform.parent = transform.parent;
+
+        foreach (Vector2Int gridPos in gridCoverage)
+            grid.GetItem(gridPos.x, gridPos.y).SetBuilding(building);
+
+        Debug.Log(buildingTypes[selectionIndex].name + " has been built!");
+
+        // IF MOVING
+        // Destroy ghost and unlock selectionIndex
+        if (isMoving)
+        {
+            isMoving = false;
+            Destroy(moveGhost.gameObject);
+            moveGhost = null;
+        }
+
+        // Build success
+        return true;
     }
 
     // Places building at mouse position
@@ -179,6 +190,7 @@ public class BuildingGrid : MonoBehaviour
         return PlaceBuilding(x, y);
     }
 
+    // Initiates the process of moving a building
     public void MoveStart()
     {
         BuildGridObject gridObj = grid.GetItem(GetMouseWorldPosition());
@@ -198,8 +210,11 @@ public class BuildingGrid : MonoBehaviour
         // Moving ends when a building is placed (see PlaceBuilding)
     }
 
+    // Cancels the moving process if it is ongoing
     public void MoveCancel()
     {
+        if (!isMoving) return;
+
         // Create building at old location
         grid.GetXY(moveGhost.transform.position, out int x, out int y);
         PlaceBuilding(x, y);

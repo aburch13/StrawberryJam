@@ -39,7 +39,7 @@ public class Grid<T>
         }
 
         // Debug tools: visualize grid layout and item values
-        bool showDebugGrid = true;
+        bool showDebugGrid = false;
         bool showDebugText = false;
         if (showDebugGrid || showDebugText)
         {

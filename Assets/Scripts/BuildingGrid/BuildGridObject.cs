@@ -7,6 +7,7 @@ public class BuildGridObject : GridObject
     // Fields
     public new Grid<BuildGridObject> grid;
     private Building building;
+    private Transform cellVisual;
 
     // Properties
     public bool CanBuild
@@ -15,10 +16,11 @@ public class BuildGridObject : GridObject
     }
 
     // Constructor
-    public BuildGridObject(Grid<BuildGridObject> grid, int x, int y) 
+    public BuildGridObject(Grid<BuildGridObject> grid, int x, int y, Transform cellVisual) 
         : base(x, y)
     {
         this.grid = grid;
+        this.cellVisual = cellVisual;
     }
 
     // Methods
