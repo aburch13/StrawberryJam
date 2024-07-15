@@ -177,6 +177,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2718588880427849472}
+  - component: {fileID: 5594858856221872155}
   m_Layer: 0
   m_Name: GridCell
   m_TagString: Untagged
@@ -201,3 +202,18 @@ Transform:
   - {fileID: 2146692674294416307}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5594858856221872155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7576269911116441841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20eb597cda0dda94786ae0a5f8c931d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cellSprite: {fileID: 8984545059456837266}
+  canPlaceColor: {r: 0, g: 1, b: 0, a: 0.2}
+  cannotPlaceColor: {r: 1, g: 0, b: 0, a: 0.2}

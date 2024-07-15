@@ -36,11 +36,11 @@ public class BuildingGhost : MonoBehaviour
             visual = null;
         }
 
-        BuildingData newData = BuildingGrid.Instance.CurrentSelection;
+        data = BuildingGrid.Instance.CurrentSelection;
 
-        if (newData != null)
+        if (data != null)
         {
-            visual = Instantiate(newData.visual, Vector3.zero, Quaternion.identity);
+            visual = Instantiate(data.visual, Vector3.zero, Quaternion.identity);
             visual.parent = transform;
             visual.localPosition = Vector3.zero;
             visual.localEulerAngles = Vector3.zero;

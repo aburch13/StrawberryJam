@@ -72,7 +72,7 @@ public class BuildingGrid : MonoBehaviour
             {
                 Transform cell = Instantiate(cellVisual, g.GetWorldPosition(x, y), Quaternion.identity, transform);
                 cell.transform.localScale *= cellSize;
-                return new BuildGridObject(g, x, y, cell);
+                return new BuildGridObject(g, x, y, cell.GetComponent<BuildGridCell>());
             });
     }
 
