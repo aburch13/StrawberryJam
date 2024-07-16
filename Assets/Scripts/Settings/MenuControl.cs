@@ -15,7 +15,7 @@ public class MenuControl : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (!menu.activeSelf)
                 OpenMenu();

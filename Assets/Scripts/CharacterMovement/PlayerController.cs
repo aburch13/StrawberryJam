@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        currentState = new WalkingState(this);
+        currentState = new BuildingState(this);
         currentState.Enter();
     }
 
@@ -27,12 +27,17 @@ public class PlayerController : MonoBehaviour
         if (nearestInteractable == null)
         {
             CharacterStates s = nearestInteractable.Interact();
-            if (s != null )
-            {
-                currentState.Exit();
-                currentState = s;
-                s.Enter();
-            }
+            SwitchStates(s);
+        }
+    }
+
+    public void SwitchStates(CharacterStates s)
+    {
+        if (s != null)
+        {
+            currentState.Exit();
+            currentState = s;
+            s.Enter();
         }
     }
 

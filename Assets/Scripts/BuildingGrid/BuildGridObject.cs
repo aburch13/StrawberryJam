@@ -22,7 +22,6 @@ public class BuildGridObject : GridObject
     {
         this.grid = grid;
         this.cellVisual = cellVisual;
-        cellVisual.UpdateColor(cellVisual.canPlaceColor);
     }
 
     // Methods
@@ -35,12 +34,23 @@ public class BuildGridObject : GridObject
     {
         this.building = building;
         grid.FlagDirty(x, y);
-        cellVisual.UpdateColor(cellVisual.cannotPlaceColor);
     }
 
     public void ClearBuilding()
     {
         building = null;
-        cellVisual.UpdateColor(cellVisual.canPlaceColor);
+    }
+
+    public void ResetValidity()
+    {
+        cellVisual.UpdateColor(cellVisual.restingColor);
+    }
+
+    public void SetValidity(bool canPlace)
+    {
+        if (canPlace)
+            cellVisual.UpdateColor(cellVisual.canPlaceColor);
+        else
+            cellVisual.UpdateColor(cellVisual.cannotPlaceColor);
     }
 }

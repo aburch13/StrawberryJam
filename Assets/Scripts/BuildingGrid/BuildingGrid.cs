@@ -4,6 +4,18 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
+public class GridMoveEventArgs : EventArgs
+{
+    public Vector2Int lastGridPosition;
+    public Vector2Int currGridPosition;
+
+    public GridMoveEventArgs(Vector2Int lastGridPosition, Vector2Int currGridPosition)
+    {
+        this.lastGridPosition = lastGridPosition;
+        this.currGridPosition = currGridPosition;
+    }
+}
+
 public class BuildingGrid : MonoBehaviour
 {
     // Grid fields
@@ -11,7 +23,8 @@ public class BuildingGrid : MonoBehaviour
     public int gridWidth;
     public int gridHeight;
     public float cellSize;
-    public Transform cellVisual;
+    public Transform cellVisualPrefab;
+    private Vector2Int currCellGridPos = Vector2Int.zero;
 
     // Building selection fields
     [SerializeField] private List<BuildingData> buildingTypes;
@@ -21,6 +34,7 @@ public class BuildingGrid : MonoBehaviour
 
     // Event fields
     public event EventHandler<EventArgs> OnSelectionChange;
+    public event EventHandler<GridMoveEventArgs> OnCellMove;
 
     // Properties
     public static BuildingGrid Instance // Singleton property for global access
@@ -31,22 +45,12 @@ public class BuildingGrid : MonoBehaviour
 
     public Vector2Int CurrentCellGridPos // Mouse position on grid in grid coordinates
     {
-        get
-        {
-            grid.GetXY(GetMouseWorldPosition(), out int x, out int y);
-            return new Vector2Int(x, y);
-        }
+        get { return currCellGridPos; }
     }
 
     public Vector3 CurrentCellWorldPos // Mouse position on grid in world coordinates
     {
-        get
-        {
-            Vector2Int currGridPos = CurrentCellGridPos;
-            return grid.GetWorldPosition(currGridPos.x, currGridPos.y);
-
-            // For cell center add: new Vector3(cellSize/2f, cellSize/2f)
-        }
+        get { return grid.GetWorldPosition(currCellGridPos.x, currCellGridPos.y); }
     }
 
     public BuildingData CurrentSelection // Currently selected building type
@@ -70,54 +74,10 @@ public class BuildingGrid : MonoBehaviour
             new Vector3(gridWidth, gridHeight) * -cellSize / 2f, 
             (Grid<BuildGridObject> g, int x, int y) =>
             {
-                Transform cell = Instantiate(cellVisual, g.GetWorldPosition(x, y), Quaternion.identity, transform);
+                Transform cell = Instantiate(cellVisualPrefab, g.GetWorldPosition(x, y), Quaternion.identity, transform);
                 cell.transform.localScale *= cellSize;
                 return new BuildGridObject(g, x, y, cell.GetComponent<BuildGridCell>());
             });
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        // Place building on left click
-        if (Input.GetMouseButtonDown(0))
-        {
-            PlaceBuilding();
-        }
-
-        // Move building on right click
-        // Right click again to cancel moving
-        if (Input.GetMouseButtonDown(1))
-        {
-            if (!isMoving)
-                MoveStart();
-            else
-                MoveCancel();
-        }
-
-        // Change selected building option using Q/E
-        if (Input.GetKeyDown(KeyCode.Q) && !isMoving)
-        {
-            selectionIndex -= 1;
-
-            // Loop to end of list as needed
-            if (selectionIndex < 0) 
-                selectionIndex = buildingTypes.Count - 1;
-
-            OnSelectionChange?.Invoke(this, new EventArgs());
-            Debug.Log("Now building: " + buildingTypes[selectionIndex].name);
-        }
-        if (Input.GetKeyDown(KeyCode.E) && !isMoving)
-        {
-            selectionIndex += 1;
-
-            // Loop to start of list as needed
-            if (selectionIndex >= buildingTypes.Count) 
-                selectionIndex = 0;
-
-            OnSelectionChange?.Invoke(this, new EventArgs());
-            Debug.Log("Now building: " + buildingTypes[selectionIndex].name);
-        }
     }
 
     // Attempts to create a new building at given grid position
@@ -183,17 +143,25 @@ public class BuildingGrid : MonoBehaviour
         return true;
     }
 
-    // Places building at mouse position
+    // Places building at current position
     public bool PlaceBuilding()
     {
-        grid.GetXY(GetMouseWorldPosition(), out int x, out int y);
-        return PlaceBuilding(x, y);
+        return PlaceBuilding(currCellGridPos.x, currCellGridPos.y);
+    }
+
+    // Switches between starting/ending building move process
+    public void ToggleMoveBuilding()
+    {
+        if (isMoving)
+            CancelMoveBuilding();
+        else
+            StartMoveBuilding();
     }
 
     // Initiates the process of moving a building
-    public void MoveStart()
+    public void StartMoveBuilding()
     {
-        BuildGridObject gridObj = grid.GetItem(GetMouseWorldPosition());
+        BuildGridObject gridObj = grid.GetItem(currCellGridPos.x, currCellGridPos.y);
         Building building = gridObj.GetBuilding();
 
         if (building != null)
@@ -211,7 +179,7 @@ public class BuildingGrid : MonoBehaviour
     }
 
     // Cancels the moving process if it is ongoing
-    public void MoveCancel()
+    public void CancelMoveBuilding()
     {
         if (!isMoving) return;
 
@@ -222,10 +190,29 @@ public class BuildingGrid : MonoBehaviour
         // Moving fields reset by PlaceBuilding
     }
 
-    // Destroys any existing building at current mouse position
+    // Changes the currently selected building type
+    public void ChangeBuildSelection(bool isForward)
+    {
+        if (!isMoving)
+        {
+            if (isForward) selectionIndex++;
+            else selectionIndex--;
+
+            // Loop to start/end of list as needed
+            if (selectionIndex < 0)
+                selectionIndex = buildingTypes.Count - 1;
+            if (selectionIndex >= buildingTypes.Count)
+                selectionIndex = 0;
+
+            OnSelectionChange?.Invoke(this, new EventArgs());
+            Debug.Log("Now building: " + buildingTypes[selectionIndex].name);
+        }
+    }
+
+    // Destroys any existing building at current position
     public void DestroyBuilding()
     {
-        BuildGridObject gridObj = grid.GetItem(GetMouseWorldPosition());
+        BuildGridObject gridObj = grid.GetItem(currCellGridPos.x, currCellGridPos.y);
         Building building = gridObj.GetBuilding();
 
         // If building exists at selected cell, remove all cell references and destroy it
@@ -242,6 +229,38 @@ public class BuildingGrid : MonoBehaviour
             // Destroy building
             building.DestroySelf();
         }
+    }
+
+    // Get grid object at given position
+    public BuildGridObject GetCellData(int x, int y)
+    {
+        return grid.GetItem(x, y);
+    }
+
+    // Update current cell position to mouse position
+    public void MoveToMouseCell()
+    {
+        grid.GetXY(GetMouseWorldPosition(), out int x, out int y);
+        Vector2Int newGridPos = new(x, y);
+        if (newGridPos.x < 0 || newGridPos.x >= gridWidth || newGridPos.y < 0 || newGridPos.y >= gridHeight) return;
+
+        if (currCellGridPos != newGridPos)
+        {
+            OnCellMove?.Invoke(this, new GridMoveEventArgs(currCellGridPos, newGridPos));
+            currCellGridPos = newGridPos;
+        }
+    }
+
+    // Update current cell position by given offsets
+    public void MoveCurrentCell(int dx, int dy)
+    {
+        if (dx == 0 && dy == 0) return;
+
+        Vector2Int newGridPos = new(currCellGridPos.x + dx, currCellGridPos.y + dy);
+        if (newGridPos.x < 0 || newGridPos.x >= gridWidth || newGridPos.y < 0 || newGridPos.y >= gridHeight) return;
+
+        OnCellMove?.Invoke(this, new GridMoveEventArgs(currCellGridPos, newGridPos));
+        currCellGridPos = newGridPos;
     }
 
     // Utility method: convert mouse screen position to world XY coordinates
