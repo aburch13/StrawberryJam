@@ -163,6 +163,7 @@ GameObject:
   - component: {fileID: 2524339942981890445}
   - component: {fileID: 1169048694597126219}
   - component: {fileID: 393110236388222194}
+  - component: {fileID: 5359124242228362653}
   m_Layer: 5
   m_Name: DialogBoxBase
   m_TagString: Untagged
@@ -255,6 +256,25 @@ MonoBehaviour:
   - {fileID: 3880211540683091698}
   - {fileID: 1423913066897306479}
   - {fileID: 492965577350541116}
+  t: -1
+  targetScale: 0
+  targetAlpha: 0
+  usedRate: 0
+--- !u!114 &5359124242228362653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2185102770015552964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 568b98952d7e40c45b9829b031eaf2e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dialogueText: {fileID: 6489451614850077820}
+  nameText: {fileID: 2059078657649357958}
+  dialogueBox: {fileID: 0}
 --- !u!1 &6913894843075597472
 GameObject:
   m_ObjectHideFlags: 0
@@ -289,8 +309,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 95, y: 15}
-  m_SizeDelta: {x: -290, y: -170}
+  m_AnchoredPosition: {x: 95, y: -19.999992}
+  m_SizeDelta: {x: -290, y: -40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4511410378152666289
 CanvasRenderer:
