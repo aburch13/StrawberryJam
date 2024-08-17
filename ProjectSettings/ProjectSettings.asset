@@ -563,7 +563,8 @@ PlayerSettings:
   webGLMemoryGeometricGrowthStep: 0.2
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Standalone: TMP_PRESENT;USE_PHYSICS2D;USE_NEW_INPUT;USE_NAVMESH;USE_ARTICY
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}
